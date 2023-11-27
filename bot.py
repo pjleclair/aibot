@@ -17,7 +17,7 @@ TOKEN = os.getenv('TOKEN')
 intents = discord.Intents.default()
 intents.message_content = True
 client = discord.Client(intents=intents)
-locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
+locale.setlocale(locale.LC_ALL, '')
 
 @client.event
 async def on_ready():
@@ -33,7 +33,7 @@ async def on_message(message):
           model="gpt-4-1106-preview",
           messages=[
               {"role": "user",
-               "content": f"""Your name is AIBot or {client.user.mention}.
+               "content": f"""Pretend your name is AIBot or {client.user.mention}.
 
                Respond to the following statement in at most 2000 characters: {message.content}
                
