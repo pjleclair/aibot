@@ -30,15 +30,17 @@ async def on_message(message):
         return
     if 'aibot' in message.content.lower() or client.user.mention in message.content.lower():
         completion = openai_client.chat.completions.create(
-          model="gpt-4-1106-preview",
+          model="gpt-4o-mini",
           messages=[
-              {"role": "user",
+              {"role": "system",
                "content": f"""Pretend your name is AIBot or {client.user.mention}.
-
-               Respond to the following statement in at most 2000 characters: {message.content}
                
-               If you want to mention the person who referenced you, refer to them as {message.author.mention}
+               If you want to mention the person who referenced you, refer to them as {message.author.mention}.
                """
+               },
+               {
+                   "role": "user",
+                   "content": f"""Respond to the following statement in at most 2000 characters: {message.content}"""
                }
           ]
         )
