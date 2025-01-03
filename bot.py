@@ -1,4 +1,3 @@
-# Example: reuse your existing OpenAI setup
 import os
 import discord
 import locale
@@ -37,7 +36,7 @@ async def on_message(message):
         )
         completion = claude_client.messages.create(
           model="claude-3-5-sonnet-20241022",
-          max_tokens=1024,
+          max_tokens=2048,
           system=f"""Pretend your name is AIBot or {client.user.mention}.
                If you want to mention the person who referenced you, refer to them as {message.author.mention}.
                Here is the formatted message history for context: {formatted_history}
