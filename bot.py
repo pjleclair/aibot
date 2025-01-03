@@ -1,16 +1,15 @@
 # Example: reuse your existing OpenAI setup
 import os
-from openai import OpenAI
 import discord
 import locale
-
+import anthropic
 from dotenv import load_dotenv
 
 load_dotenv()
 
-openai_api_key = os.getenv('OPENAI_TOKEN')
-openai_client = OpenAI(
-    api_key=openai_api_key
+claude_api_key = os.getenv("CLAUDE_API_KEY")
+claude_client = anthropic.Anthropic(
+    api_key=claude_api_key
 )
 
 TOKEN = os.getenv('TOKEN')
@@ -29,21 +28,27 @@ async def on_message(message):
     if message.author == client.user:
         return
     if 'aibot' in message.content.lower() or client.user.mention in message.content.lower():
-        completion = openai_client.chat.completions.create(
-          model="gpt-4o-mini",
-          messages=[
-              {"role": "system",
-               "content": f"""Pretend your name is AIBot or {client.user.mention}.
-               
+        message_history = [
+            msg async for msg in message.channel.history(limit=10)
+        ]
+        # Format history as a string to include in the system prompt
+        formatted_history = "\n".join(
+            [f"{msg.author.name}: {msg.content}" for msg in message_history[::-1]]
+        )
+        completion = claude_client.messages.create(
+          model="claude-3-5-sonnet-20241022",
+          max_tokens=1024,
+          system=f"""Pretend your name is AIBot or {client.user.mention}.
                If you want to mention the person who referenced you, refer to them as {message.author.mention}.
-               """
-               },
+               Here is the formatted message history for context: {formatted_history}
+               """,
+          messages=[
                {
                    "role": "user",
                    "content": f"""Respond to the following statement in at most 2000 characters: {message.content}"""
                }
           ]
         )
-        await message.channel.send(completion.choices[0].message.content[0:1999])
+        await message.channel.send(completion.content[0].text[0:1999])
 
 client.run(TOKEN)
