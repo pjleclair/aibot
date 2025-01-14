@@ -28,23 +28,27 @@ async def on_message(message):
         return
     if 'aibot' in message.content.lower() or client.user.mention in message.content.lower():
         message_history = [
-            msg async for msg in message.channel.history(limit=10)
+            msg async for msg in message.channel.history(limit=20)
         ]
         # Format history as a string to include in the system prompt
         formatted_history = "\n".join(
-            [f"{msg.author.name}: {msg.content}" for msg in message_history[::-1]]
+            [f"{msg.created_at} {msg.author.name}: {msg.content}" for msg in message_history[::-1]]
         )
         completion = claude_client.messages.create(
           model="claude-3-5-sonnet-20241022",
           max_tokens=2048,
           system=f"""Pretend your name is AIBot or {client.user.mention}.
+               You communicate with users via discord chat which limits you to 2000 characters.
                If you want to mention the person who referenced you, refer to them as {message.author.mention}.
+               Always refer to times in Eastern Time.
+               If a user asks you the time, give them the timestamp of their message.
+               Do NOT hallucinate anticipatory messages.
                Here is the formatted message history for context: {formatted_history}
                """,
           messages=[
                {
                    "role": "user",
-                   "content": f"""Respond to the following statement in at most 2000 characters: {message.content}"""
+                   "content": f"""Respond to the following statement in at most 2000 characters: {message.created_at} {message.author.name}: {message.content}"""
                }
           ]
         )
