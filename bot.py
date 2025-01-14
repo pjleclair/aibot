@@ -23,10 +23,12 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-    print(message.content)
+    print(message)
     if message.author == client.user:
         return
-    if 'aibot' in message.content.lower() or client.user.mention in message.content.lower():
+    is_dm = isinstance(message.channel, discord.DMChannel)
+    is_bot_mention = 'aibot' in message.content.lower() or client.user.mention in message.content.lower()
+    if is_dm or is_bot_mention:
         message_history = [
             msg async for msg in message.channel.history(limit=20)
         ]
