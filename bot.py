@@ -1,4 +1,5 @@
 import os
+import json
 import discord
 import locale
 import anthropic
@@ -22,7 +23,8 @@ intents.message_content = True
 client = discord.Client(intents=intents)
 locale.setlocale(locale.LC_ALL, '')
 
-dictionary = os.getenv('DICTIONARY')
+dictionary_str = os.getenv('DICTIONARY')
+dictionary = json.loads(dictionary_str)
 
 def getSystemPrompt(message):
     prompt_template = os.getenv('SYSTEM_PROMPT')
