@@ -1,61 +1,55 @@
-# Discord AIBot with Claude Integration
+# Discord AI Chatbot
 
-A Discord bot that uses Claude AI to respond to messages while maintaining conversation context.
+This is a Discord chatbot that integrates with OpenAI and Claude AI models to generate responses based on user messages. It allows switching between AI models dynamically and responds to direct messages and mentions.
 
 ## Features
-- Responds when mentioned or when "aibot" is typed
-- Maintains conversation context by tracking recent message history
-- Uses Claude 3 Sonnet model for AI responses
-- Supports Discord mentions and formatting
+- Supports both OpenAI and Claude AI models.
+- Responds to messages in Discord channels and direct messages.
+- Allows switching between AI models using `-o3` or `-claude` commands.
+- Uses a system prompt template for consistent AI responses.
+- Retrieves recent message history to provide context-aware replies.
 
-## Prerequisites
+## Installation & Setup
+### Prerequisites
 - Python 3.8+
-- Discord Bot Token
-- Anthropic API Key
+- `pip` installed
+- A Discord bot token
+- API keys for OpenAI and Claude
+- `.env` file with required environment variables
 
-## Required Packages
-```bash
-pip install discord.py anthropic python-dotenv
+### Environment Variables
+Create a `.env` file in the root directory with the following contents:
 ```
-
-## Setup
-1. Create a `.env` file in the project root with:
-```
-DISCORD_TOKEN=your_discord_token
+TOKEN=your_discord_bot_token
+OPENAI_API_KEY=your_openai_api_key
 CLAUDE_API_KEY=your_claude_api_key
+SYSTEM_PROMPT=your_system_prompt_template
+DICTIONARY=your_custom_dictionary (optional)
 ```
 
-2. Set up a Discord bot and get its token:
-   - Go to Discord Developer Portal
-   - Create New Application
-   - Add Bot
-   - Enable Message Content Intent
-   - Copy Token to .env file
-
-3. Get Claude API key from Anthropic and add to .env file
+### Installation Steps
+1. Clone the repository:
+   ```sh
+   git clone https://github.com/your-repo.git
+   cd your-repo
+   ```
+2. Install dependencies:
+   ```sh
+   pip install -r requirements.txt
+   ```
+3. Run the bot:
+   ```sh
+   python bot.py
+   ```
 
 ## Usage
-1. Run the script:
-```bash
-python bot.py
-```
+- Mention the bot (`@botname`) or send a direct message to trigger a response.
+- Use `-o3` to switch to OpenAI's model.
+- Use `-claude` to switch to Claude AI's model.
+- The bot automatically retrieves recent messages for context-aware responses.
 
-2. In Discord:
-   - Mention the bot (@AIBot) or type "aibot" in any message
-   - Bot will respond using message history for context
-   - Responses limited to 2000 characters (Discord limit)
-
-## Features Explained
-- Tracks last 10 messages for context
-- Formats chat history for Claude's understanding
-- Maintains consistent bot personality
-- Supports user mentions
-- Handles message content safely
-
-## Limitations
-- 2000 character response limit
-- 10 message history limit
-- Requires appropriate Discord bot permissions
-
-## Note
-Remember to keep your API keys secure and never share them publicly.
+## Troubleshooting
+- Ensure all environment variables are correctly set.
+- Verify that the bot has permissions to read messages and send messages in the desired Discord channels.
+- Check the API keys and ensure they are valid.
+- Look at the console output for any error messages.
