@@ -75,16 +75,20 @@ async def makeCompletion(message, isClaude):
     else:
         openai_completion = openai_client.chat.completions.create(
             model="o3-mini",
-            max_completion_tokens=2048,
+            max_completion_tokens=2000,
             messages=[
                 {
                     "role": "system",
                     "content": SYSTEM_PROMPT_TEXT
                 },
                 {
+                    "role": "system",
+                    "content": f"History: {formatted_history}"
+                },
+                {
                     "role": "user",
                     "content": AGENT_PROMPT_TEXT
-                }
+                },
             ],
         )
         return openai_completion
