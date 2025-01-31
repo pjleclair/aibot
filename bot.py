@@ -47,44 +47,46 @@ async def makeCompletion(message, isClaude):
     )
     SYSTEM_PROMPT_TEXT = getSystemPrompt(message)
     AGENT_PROMPT_TEXT = f"Latest message: {message.created_at} {message.author.name}: {message.content}\n"
-    CLAUDE_SYSTEM_PROMPT = [
-        {
-            "type": "text",
-            "text": SYSTEM_PROMPT_TEXT
-        },
-        {
-            "type": "text",
-            "text": f"History: {formatted_history}",
-            "cache_control": { "type": "ephemeral" }
-        }
-    ]
-    claude_completion = claude_client.messages.create(
-        model="claude-3-5-sonnet-20241022",
-        max_tokens=2048,
-        system=CLAUDE_SYSTEM_PROMPT,
-        messages=[
+    
+    if isClaude:
+        CLAUDE_SYSTEM_PROMPT = [
             {
-                "role": "user",
-                "content": AGENT_PROMPT_TEXT
-            }
-        ]
-    )
-    openai_completion = openai_client.chat.completions.create(
-        model="o3-mini",
-        messages=[
-            {
-                "role": "system",
-                "content": SYSTEM_PROMPT_TEXT
+                "type": "text",
+                "text": SYSTEM_PROMPT_TEXT
             },
             {
-                "role": "user",
-                "content": AGENT_PROMPT_TEXT
+                "type": "text",
+                "text": f"History: {formatted_history}",
+                "cache_control": { "type": "ephemeral" }
             }
         ]
-    )
-    if isClaude:
+        claude_completion = claude_client.messages.create(
+            model="claude-3-5-sonnet-20241022",
+            max_tokens=2048,
+            system=CLAUDE_SYSTEM_PROMPT,
+            messages=[
+                {
+                    "role": "user",
+                    "content": AGENT_PROMPT_TEXT
+                }
+            ]
+        )
         return claude_completion
     else:
+        openai_completion = openai_client.chat.completions.create(
+            model="o3-mini",
+            max_completion_tokens=2048,
+            messages=[
+                {
+                    "role": "system",
+                    "content": SYSTEM_PROMPT_TEXT
+                },
+                {
+                    "role": "user",
+                    "content": AGENT_PROMPT_TEXT
+                }
+            ],
+        )
         return openai_completion
 
 @client.event
@@ -99,7 +101,7 @@ async def on_message(message):
             return
         is_dm = isinstance(message.channel, discord.DMChannel)
         is_bot_mention = 'aibot' in message.content.lower() or client.user.mention in message.content.lower()
-        is_agent_update_request = '-o3' or '-claude' in message.content.lower()
+        is_agent_update_request = '-o3' in message.content.lower() or '-claude' in message.content.lower()
         if is_agent_update_request:
             claude_request = '-claude' in message.content.lower()
             if claude_request:
