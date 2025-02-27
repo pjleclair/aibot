@@ -47,7 +47,7 @@ async def makeCompletion(message, isClaude):
     )
     SYSTEM_PROMPT_TEXT = getSystemPrompt(message)
     AGENT_PROMPT_TEXT = f"Latest message: {message.created_at} {message.author.name}: {message.content}\n"
-    
+    CLAUDE_MODEL = "claude-3-7-sonnet-20250219"
     if isClaude:
         CLAUDE_SYSTEM_PROMPT = [
             {
@@ -61,7 +61,7 @@ async def makeCompletion(message, isClaude):
             }
         ]
         claude_completion = claude_client.messages.create(
-            model="claude-3-5-sonnet-20241022",
+            model=CLAUDE_MODEL,
             max_tokens=2048,
             system=CLAUDE_SYSTEM_PROMPT,
             messages=[
