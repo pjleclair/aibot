@@ -37,6 +37,12 @@ def getSystemPrompt(message):
         dictionary=dictionary
     )
 
+async def sendMsgs(text, message):
+    numMsgs = len(text) // 2000
+    for i in range(numMsgs):
+        await message.channel.send(text[i*2000:(i+1)*2000])
+    await message.channel.send(text[numMsgs*2000:])
+
 async def makeCompletion(message, isClaude):
     message_history = [
         msg async for msg in message.channel.history(limit=20)
@@ -62,7 +68,7 @@ async def makeCompletion(message, isClaude):
         ]
         claude_completion = claude_client.messages.create(
             model=CLAUDE_MODEL,
-            max_tokens=2048,
+            max_tokens=3000,
             system=CLAUDE_SYSTEM_PROMPT,
             messages=[
                 {
@@ -75,7 +81,7 @@ async def makeCompletion(message, isClaude):
     else:
         openai_completion = openai_client.chat.completions.create(
             model="o3-mini",
-            max_completion_tokens=2000,
+            max_completion_tokens=3000,
             messages=[
                 {
                     "role": "system",
@@ -117,11 +123,11 @@ async def on_message(message):
             isClaude = agent == 'claude'
             completion = await makeCompletion(message, isClaude)
             if isClaude:
-                claudeMsg = completion.content[0].text[0:1999]
-                await message.channel.send(claudeMsg)
+                text = completion.content[0].text
+                await sendMsgs(text, message)
             else:
-                openaiMsg = completion.choices[0].message.content[0:1999]
-                await message.channel.send(openaiMsg)
+                text = completion.choices[0].message.content
+                await sendMsgs(text, message)
     except Exception as e:
         print(f'Error: {e}')
 
