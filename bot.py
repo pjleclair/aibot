@@ -8,6 +8,11 @@ from dotenv import load_dotenv
 
 load_dotenv()
 openai_api_key = os.getenv('OPENAI_API_KEY')
+xai_key = os.getenv('XAI_KEY')
+xai_client = OpenAI(
+    base_url="https://api.x.ai/v1",
+    api_key=xai_key
+)
 openai_client = OpenAI(
     api_key=openai_api_key
 )
@@ -53,7 +58,8 @@ async def makeCompletion(message, isClaude):
     )
     SYSTEM_PROMPT_TEXT = getSystemPrompt(message)
     AGENT_PROMPT_TEXT = f"Latest message: {message.created_at} {message.author.name}: {message.content}\n"
-    CLAUDE_MODEL = "claude-3-7-sonnet-20250219"
+    CLAUDE_MODEL = "claude-sonnet-4-20250514"
+
     if isClaude:
         CLAUDE_SYSTEM_PROMPT = [
             {
@@ -68,7 +74,7 @@ async def makeCompletion(message, isClaude):
         ]
         claude_completion = claude_client.messages.create(
             model=CLAUDE_MODEL,
-            max_tokens=3000,
+            max_tokens=1000,
             system=CLAUDE_SYSTEM_PROMPT,
             messages=[
                 {
@@ -79,25 +85,45 @@ async def makeCompletion(message, isClaude):
         )
         return claude_completion
     else:
-        openai_completion = openai_client.chat.completions.create(
-            model="o3-mini",
-            max_completion_tokens=3000,
+#        openai_completion = openai_client.chat.completions.create(
+#            model="o3-mini",
+#            max_completion_tokens=1000,
+#            messages=[
+#                {
+#                    "role": "system",
+#                    "content": SYSTEM_PROMPT_TEXT
+#                },
+#                {
+#                    "role": "system",
+#                    "content": f"History: {formatted_history}"
+#                },
+#                {
+#                    "role": "user",
+#                    "content": AGENT_PROMPT_TEXT
+#                },
+#            ],
+#        )
+#        return openai_completion
+        xai_completion = xai_client.chat.completions.create(
+            model="grok-3-mini", # or "grok-3-mini-fast"
+            reasoning_effort="high",
             messages=[
-                {
-                    "role": "system",
-                    "content": SYSTEM_PROMPT_TEXT
-                },
-                {
-                    "role": "system",
-                    "content": f"History: {formatted_history}"
-                },
                 {
                     "role": "user",
                     "content": AGENT_PROMPT_TEXT
-                },
-            ],
+                    },
+                {
+                    "role": "system",
+                    "content": SYSTEM_PROMPT_TEXT
+                    },
+                {
+                    "role": "system",
+                    "content": f"History: {formatted_history}"
+                    }
+                ],
+            temperature=0.7,
         )
-        return openai_completion
+        return xai_completion
 
 @client.event
 async def on_ready():
@@ -112,13 +138,13 @@ async def on_message(message):
             return
         is_dm = isinstance(message.channel, discord.DMChannel)
         is_bot_mention = 'aibot' in message.content.lower() or client.user.mention in message.content.lower()
-        is_agent_update_request = '-o3' in message.content.lower() or '-claude' in message.content.lower()
+        is_agent_update_request = '-grok' in message.content.lower() or '-claude' in message.content.lower()
         if is_agent_update_request:
             claude_request = '-claude' in message.content.lower()
             if claude_request:
                 agent = 'claude'
             else:
-                agent = 'o3'
+                agent = 'grok'
         if is_dm or is_bot_mention:
             isClaude = agent == 'claude'
             completion = await makeCompletion(message, isClaude)
