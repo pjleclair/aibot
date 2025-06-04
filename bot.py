@@ -46,7 +46,7 @@ async def sendMsgs(text, message):
     await message.channel.send(text[numMsgs * 2000 :])
 
 
-async def triageRequest(message):
+async def sendMessage(message):
     global agent
 
     isClaude = agent == "claude"
@@ -137,8 +137,10 @@ async def makeCompletion(message, isClaude, isOpenAI):
 
 def updateAgent(msg_text):
     global agent
+
     claude_request = "-claude" in msg_text
     o3_request = "-o3" in msg_text
+
     if claude_request:
         agent = "claude"
     elif o3_request:
@@ -161,11 +163,13 @@ async def on_message(message):
         is_dm = isinstance(message.channel, discord.DMChannel)
         msg_text = message.content.lower()
         is_bot_mention = "aibot" in msg_text or client.user.mention in msg_text
-        is_agent_update_request = "-grok" in msg_text or "-claude" in msg_text
+        is_agent_update_request = (
+            "-grok" in msg_text or "-claude" in msg_text or "-o3" in msg_text
+        )
         if is_agent_update_request:
             updateAgent(msg_text)
         if is_dm or is_bot_mention:
-            await triageRequest(message)
+            await sendMessage(message)
     except Exception as e:
         print(f"Error: {e}")
 
