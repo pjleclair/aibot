@@ -135,10 +135,10 @@ async def makeCompletion(message, isClaude, isOpenAI):
         )
 
 
-def updateAgent(message):
+def updateAgent(msg_text):
     global agent
-    claude_request = "-claude" in message.content.lower()
-    o3_request = "-o3" in message.content.lower()
+    claude_request = "-claude" in msg_text
+    o3_request = "-o3" in msg_text
     if claude_request:
         agent = "claude"
     elif o3_request:
@@ -154,21 +154,16 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-    global agent
     try:
         print(message.content)
         if message.author == client.user:
             return
         is_dm = isinstance(message.channel, discord.DMChannel)
-        is_bot_mention = (
-            "aibot" in message.content.lower()
-            or client.user.mention in message.content.lower()
-        )
-        is_agent_update_request = (
-            "-grok" in message.content.lower() or "-claude" in message.content.lower()
-        )
+        msg_text = message.content.lower()
+        is_bot_mention = "aibot" in msg_text or client.user.mention in msg_text
+        is_agent_update_request = "-grok" in msg_text or "-claude" in msg_text
         if is_agent_update_request:
-            updateAgent(message)
+            updateAgent(msg_text)
         if is_dm or is_bot_mention:
             await triageRequest(message)
     except Exception as e:
