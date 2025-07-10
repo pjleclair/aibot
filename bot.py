@@ -96,7 +96,7 @@ def makeOpenAICompletion(AGENT_PROMPT_TEXT, SYSTEM_PROMPT_TEXT, formatted_histor
 
 def makeXAICompletion(AGENT_PROMPT_TEXT, SYSTEM_PROMPT_TEXT, formatted_history):
     xai_completion = xai_client.chat.completions.create(
-        model="grok-3-mini",  # or "grok-3-mini-fast"
+        model="grok-4-latest",  # or "grok-3-mini-fast"
         reasoning_effort="high",
         max_tokens=1000,
         messages=[
