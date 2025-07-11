@@ -61,6 +61,7 @@ async def sendMessage(message):
     if "!image" in message.content.lower():
         text = makeImage(message.content)
         await sendMsgs(text, message)
+        return
 
     isClaude = agent == "claude"
     isOpenAI = agent == "o3"
