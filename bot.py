@@ -29,6 +29,13 @@ if dictionary_str is None:
 dictionary = json.loads(dictionary_str)
 
 
+def makeImage(text):
+    response = xai_client.image.sample(
+        model="grok-2-image-latest", prompt=text, image_format="url"
+    )
+    return response.url
+
+
 def getSystemPrompt(message):
     prompt_template = os.getenv("SYSTEM_PROMPT")
     if not prompt_template:
@@ -50,6 +57,10 @@ async def sendMsgs(text, message):
 
 async def sendMessage(message):
     global agent
+
+    if "!image" in message.content.lower():
+        text = makeImage(message.content)
+        await sendMsgs(text, message)
 
     isClaude = agent == "claude"
     isOpenAI = agent == "o3"
