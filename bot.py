@@ -5,11 +5,13 @@ import locale
 import anthropic
 from openai import OpenAI
 from dotenv import load_dotenv
+from xai_sdk import Client
+from xai_sdk.chat import user, system
 
 load_dotenv()
 openai_api_key = os.getenv("OPENAI_API_KEY")
 xai_key = os.getenv("XAI_KEY")
-xai_client = OpenAI(base_url="https://api.x.ai/v1", api_key=xai_key)
+xai_client = Client(api_key=xai_key)
 openai_client = OpenAI(api_key=openai_api_key)
 claude_api_key = os.getenv("CLAUDE_API_KEY")
 claude_client = anthropic.Anthropic(api_key=claude_api_key)
@@ -57,9 +59,11 @@ async def sendMessage(message):
     if isClaude:
         text = completion.content[0].text
         await sendMsgs(text, message)
-    else:
+    elif isOpenAI:
         text = completion.choices[0].message.content
         await sendMsgs(text, message)
+    else:
+        await sendMsgs(completion, message)
 
 
 def makeClaudeCompletion(AGENT_PROMPT_TEXT, SYSTEM_PROMPT_TEXT, formatted_history):
@@ -95,18 +99,16 @@ def makeOpenAICompletion(AGENT_PROMPT_TEXT, SYSTEM_PROMPT_TEXT, formatted_histor
 
 
 def makeXAICompletion(AGENT_PROMPT_TEXT, SYSTEM_PROMPT_TEXT, formatted_history):
-    xai_completion = xai_client.chat.completions.create(
+    xai_completion = xai_client.chat.create(
         model="grok-4-latest",  # or "grok-3-mini-fast"
-        reasoning_effort="high",
         max_tokens=1000,
-        messages=[
-            {"role": "user", "content": AGENT_PROMPT_TEXT},
-            {"role": "system", "content": SYSTEM_PROMPT_TEXT},
-            {"role": "system", "content": f"History: {formatted_history}"},
-        ],
         temperature=0.7,
     )
-    return xai_completion
+    xai_completion.append(user(AGENT_PROMPT_TEXT))
+    xai_completion.append(system(SYSTEM_PROMPT_TEXT))
+    xai_completion.append(system(f"History: {formatted_history}"))
+    response = xai_completion.sample()
+    return response.content
 
 
 async def makeCompletion(message, isClaude, isOpenAI):
