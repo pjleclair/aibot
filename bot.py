@@ -55,12 +55,18 @@ async def sendMsgs(text, message):
     await message.channel.send(text[numMsgs * 2000 :])
 
 
+async def sendImage(message):
+    url = makeImage(message.content)
+    embed = discord.Embed()
+    embed.set_image(url=url)
+    await message.channel.send(embed=embed)
+
+
 async def sendMessage(message):
     global agent
 
     if "!image" in message.content.lower():
-        text = makeImage(message.content)
-        await sendMsgs(text, message)
+        await sendImage(message)
         return
 
     isClaude = agent == "claude"
